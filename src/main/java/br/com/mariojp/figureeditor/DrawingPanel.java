@@ -2,11 +2,14 @@
 package br.com.mariojp.figureeditor;
 
 import javax.swing.*;
+
+import br.com.mariojp.figureeditor.shapes.models.AbstractShape;
+import br.com.mariojp.figureeditor.shapes.models.CircleShape;
+import br.com.mariojp.figureeditor.shapes.models.RectangleShape;
+
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.geom.Ellipse2D;
-import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,7 +17,7 @@ class DrawingPanel extends JPanel {
 
     private static final long serialVersionUID = 1L;
     private static final int DEFAULT_SIZE = 60;
-    private final List<Shape> shapes = new ArrayList<>();
+    private final List<AbstractShape> shapes = new ArrayList<>();
     private Point startDrag = null;
 
     DrawingPanel() {
@@ -27,8 +30,7 @@ class DrawingPanel extends JPanel {
             @Override public void mouseClicked(MouseEvent e) {
                 if (e.getClickCount() == 1 && startDrag == null) {
                     int size = Math.max(Math.min(DEFAULT_SIZE, DEFAULT_SIZE), 10);
-                    Shape s =  new Ellipse2D.Double(e.getPoint().x, e.getPoint().y, size, size);
-                    //return new Rectangle2D.Double(e.getPoint().x, e.getPoint().y, Math.max(DEFAULT_SIZE, 10), Math.max(DEFAULT_SIZE, 10));
+                    AbstractShape s =  new CircleShape(e.getPoint().x, e.getPoint().y, size, size, Color.BLUE);
                     shapes.add(s);
                     repaint();
                 }
@@ -49,12 +51,12 @@ class DrawingPanel extends JPanel {
         Graphics2D g2 = (Graphics2D) g.create();
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-        for (Shape s : shapes) {
-            g2.setColor(new Color(30,144,255));
-            g2.fill(s);
-            g2.setColor(new Color(0,0,0,70));
+        for (AbstractShape s : shapes) {
+            Shape shape = s.createShape();
+            g2.setColor(s.getColor());
+            g2.fill(shape);
             g2.setStroke(new BasicStroke(1.2f));
-            g2.draw(s);
+            g2.draw(shape);
         }
 
         g2.dispose();
