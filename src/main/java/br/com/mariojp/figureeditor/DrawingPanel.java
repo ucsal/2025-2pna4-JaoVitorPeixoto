@@ -3,6 +3,7 @@ package br.com.mariojp.figureeditor;
 
 import javax.swing.*;
 
+import br.com.mariojp.figureeditor.shapes.enums.ShapeType;
 import br.com.mariojp.figureeditor.shapes.models.AbstractShape;
 import br.com.mariojp.figureeditor.shapes.models.CircleShape;
 import br.com.mariojp.figureeditor.shapes.models.RectangleShape;
@@ -20,6 +21,9 @@ class DrawingPanel extends JPanel {
     private final List<AbstractShape> shapes = new ArrayList<>();
     private Point startDrag = null;
 
+    private ShapeType currentShapeType = ShapeType.RECTANGLE;
+    private Color selectedColor = Color.BLUE;
+
     DrawingPanel() {
         
         setBackground(Color.WHITE);
@@ -30,7 +34,7 @@ class DrawingPanel extends JPanel {
             @Override public void mouseClicked(MouseEvent e) {
                 if (e.getClickCount() == 1 && startDrag == null) {
                     int size = Math.max(Math.min(DEFAULT_SIZE, DEFAULT_SIZE), 10);
-                    AbstractShape s =  new CircleShape(e.getPoint().x, e.getPoint().y, size, size, Color.BLUE);
+                    AbstractShape s =  new CircleShape(e.getPoint().x, e.getPoint().y, size, size, getSelectedColor());
                     shapes.add(s);
                     repaint();
                 }
@@ -40,6 +44,22 @@ class DrawingPanel extends JPanel {
         addMouseMotionListener(mouse);
 
     }
+
+    public void setCurrentShapeType(ShapeType shapeType) {
+        this.currentShapeType = shapeType;
+    }
+
+    public ShapeType getCurrentShapeType() {
+        return this.currentShapeType;
+    }
+
+    public void setSelectedColor(Color color) {
+        this.selectedColor = color;
+    }
+
+    public Color getSelectedColor() {
+        return this.selectedColor;
+    }   
 
     void clear() {
         shapes.clear();
