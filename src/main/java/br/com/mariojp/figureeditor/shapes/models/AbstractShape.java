@@ -3,6 +3,8 @@ package br.com.mariojp.figureeditor.shapes.models;
 import java.awt.Color;
 import java.awt.Shape;
 
+import br.com.mariojp.figureeditor.shapes.enums.ShapeType;
+
 public abstract class AbstractShape{
     private int width;
     private int height;
@@ -20,6 +22,8 @@ public abstract class AbstractShape{
 
     public abstract Shape createShape();
     
+    public abstract ShapeType getShapeType();
+
     public int getWidth() {
         return width;
     }
