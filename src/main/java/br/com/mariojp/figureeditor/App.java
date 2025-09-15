@@ -21,13 +21,14 @@ public class App {
             // Barra de ferramentas
             JToolBar tlbMenuBar = new JToolBar();
             tlbMenuBar.setFloatable(false);
-
+            JComboBox<ShapeType> cmbShapes = new JComboBox<>(ShapeType.values());
+            cmbShapes.setMaximumSize(new Dimension(150, cmbShapes.getPreferredSize().height));
+            tlbMenuBar.add(cmbShapes);
             JButton btnColor = new JButton("Cor");
             tlbMenuBar.add(btnColor);
             tlbMenuBar.addSeparator();
             JButton btnClear = new JButton("Limpar");
             tlbMenuBar.add(btnClear);
-            ButtonGroup bthShapeGroup = new ButtonGroup();   
 
             // Adicione a barra no topo
             frame.add(tlbMenuBar, BorderLayout.NORTH);
@@ -40,6 +41,12 @@ public class App {
                 }
             });
 
+            cmbShapes.addActionListener(e -> {
+                ShapeType selectedShape = (ShapeType) cmbShapes.getSelectedItem();
+                if (selectedShape != null) {
+                    pnlDrawing.setCurrentShapeType(selectedShape);
+                }
+            });
 
             btnClear.addActionListener(e -> pnlDrawing.clear());
 
