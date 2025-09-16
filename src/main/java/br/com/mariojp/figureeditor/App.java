@@ -21,6 +21,14 @@ public class App {
             // Barra de ferramentas
             JToolBar tlbMenuBar = new JToolBar();
             tlbMenuBar.setFloatable(false);
+            ButtonGroup btgGroupActionButtons = new ButtonGroup();
+            JToggleButton tgbSelect = new JToggleButton("Selecionar");
+            JToggleButton tgbDraw = new JToggleButton("Desenhar");
+            btgGroupActionButtons.add(tgbSelect);
+            btgGroupActionButtons.add(tgbDraw);
+            tlbMenuBar.add(tgbSelect);
+            tlbMenuBar.add(tgbDraw);
+            tlbMenuBar.addSeparator();
             JComboBox<ShapeType> cmbShapes = new JComboBox<>(ShapeType.values());
             cmbShapes.setMaximumSize(new Dimension(150, cmbShapes.getPreferredSize().height));
             tlbMenuBar.add(cmbShapes);
@@ -38,6 +46,9 @@ public class App {
             // Adicione a barra no topo
             frame.add(tlbMenuBar, BorderLayout.NORTH);
             frame.add(pnlDrawing, BorderLayout.CENTER);
+
+            tgbDraw.setSelected(true);
+            pnlDrawing.setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
 
             btnColor.addActionListener(e -> {
                 Color novaCor = JColorChooser.showDialog(frame, "Escolha uma cor", Color.BLUE);
@@ -65,7 +76,28 @@ public class App {
                 pnlDrawing.repaint();
             });
 
+            tgbSelect.addActionListener(e -> {
+                if (tgbSelect.isSelected()) {
+                    pnlDrawing.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+                    pnlDrawing.setSelectionMode(true);
+                } else {
+                    pnlDrawing.setCursor(Cursor.getDefaultCursor());
+                    pnlDrawing.setSelectionMode(false);
+                }
+            });
+
+            tgbDraw.addActionListener(e -> {
+                if (tgbDraw.isSelected()) {
+                    pnlDrawing.setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
+                    pnlDrawing.setSelectionMode(false);
+                } else {
+                    pnlDrawing.setCursor(Cursor.getDefaultCursor());
+                    pnlDrawing.setSelectionMode(true);
+                }
+            });
+
             frame.setSize(800, 600);
+            frame.setLocationRelativeTo(null);
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             frame.setVisible(true);
         });

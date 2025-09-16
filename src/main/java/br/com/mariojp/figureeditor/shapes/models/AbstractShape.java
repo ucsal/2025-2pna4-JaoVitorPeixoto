@@ -24,6 +24,11 @@ public abstract class AbstractShape{
     
     public abstract ShapeType getShapeType();
 
+    public void move(int dx, int dy) {
+        this.x += dx;
+        this.y += dy;
+    }
+
     public int getWidth() {
         return width;
     }

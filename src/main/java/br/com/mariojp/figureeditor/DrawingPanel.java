@@ -6,6 +6,7 @@ import javax.swing.*;
 import br.com.mariojp.figureeditor.command.CommandManager;
 import br.com.mariojp.figureeditor.command.commands.AddShapeCommand;
 import br.com.mariojp.figureeditor.command.commands.ClearAllShapesCommand;
+import br.com.mariojp.figureeditor.command.commands.MoveShapeCommand;
 import br.com.mariojp.figureeditor.shapes.ShapeFactory.ShapeFactory;
 import br.com.mariojp.figureeditor.shapes.enums.ShapeType;
 import br.com.mariojp.figureeditor.shapes.models.AbstractShape;
@@ -27,6 +28,10 @@ class DrawingPanel extends JPanel {
 
     private ShapeType currentShapeType = ShapeType.RECTANGLE;
     private Color selectedColor = Color.BLUE;
+    private boolean selectionMode = false;
+    private AbstractShape selectedShape = null;
+    private Point lastDragPoint = null;
+    private Point moveStartPoint = null;
 
     private CommandManager commandManager = new CommandManager();
 
@@ -39,31 +44,71 @@ class DrawingPanel extends JPanel {
         var mouse = new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
-                startDrag = e.getPoint();
-                endDrag = e.getPoint();
+                if (selectionMode) {
+                    selectedShape = findShapeAt(e.getPoint());
+                    if (selectedShape != null) {
+                        moveStartPoint = e.getPoint();
+                        lastDragPoint = e.getPoint();
+                    }
+                } else {
+                    startDrag = e.getPoint();
+                    endDrag = e.getPoint();
+                }
             }
 
             @Override 
             public void mouseDragged(MouseEvent e){
-                endDrag = e.getPoint();
+                if (selectionMode && selectedShape != null && lastDragPoint != null) {
+                    int dx = e.getX() - lastDragPoint.x;
+                    int dy = e.getY() - lastDragPoint.y;
+                    selectedShape.move(dx, dy);
+                    lastDragPoint = e.getPoint();
+                    setCursor(Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR));
+                } else if (!selectionMode) {
+                    endDrag = e.getPoint(); 
+                }
                 repaint();
             }
 
             @Override
             public void mouseReleased(MouseEvent e) {
-                if (startDrag != null && endDrag != null){
-                    int x = Math.min(startDrag.x, endDrag.x);
-                    int y = Math.min(startDrag.y, endDrag.y);
-                    int w = Math.abs(startDrag.x - endDrag.x);
-                    int h = Math.abs(startDrag.y - endDrag.y);
-                    if (w < 10) w = DEFAULT_SIZE;
-                    if (h < 10) h = DEFAULT_SIZE;
-                    AbstractShape s =  ShapeFactory.createShape(getCurrentShapeType(), x, y, w, h, getSelectedColor());
-                    
-                    commandManager.executeCommand(new AddShapeCommand(shapes, s));
-                    startDrag = null;
-                    endDrag = null;
-                    repaint();
+                if (selectionMode) {
+                    if (selectedShape != null && moveStartPoint != null) {
+                        int totalDx = e.getX() - moveStartPoint.x;
+                        int totalDy = e.getY() - moveStartPoint.y;
+                        
+                        if (totalDx != 0 || totalDy != 0) {
+                            selectedShape.move(-totalDx, -totalDy);
+                            
+                            commandManager.executeCommand(
+                                new MoveShapeCommand(selectedShape, totalDx, totalDy)
+                            );
+                        }
+
+                        selectedShape = null;
+                        lastDragPoint = null;
+                        moveStartPoint = null;
+
+                        setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+                    }
+                } else {
+                    if (startDrag != null && endDrag != null) {
+                        int x = Math.min(startDrag.x, endDrag.x);
+                        int y = Math.min(startDrag.y, endDrag.y);
+                        int w = Math.abs(startDrag.x - endDrag.x);
+                        int h = Math.abs(startDrag.y - endDrag.y);
+                        if (w < 10) w = DEFAULT_SIZE;
+                        if (h < 10) h = DEFAULT_SIZE;
+
+                        AbstractShape s = ShapeFactory.createShape(
+                            getCurrentShapeType(), x, y, w, h, getSelectedColor()
+                        );
+
+                        commandManager.executeCommand(new AddShapeCommand(shapes, s));
+                        startDrag = null;
+                        endDrag = null;
+                        repaint();
+                    }
                 }
             }
 
@@ -98,6 +143,16 @@ class DrawingPanel extends JPanel {
         return this.selectedColor;
     }   
 
+    public void setSelectionMode(boolean enabled) {
+        this.selectionMode = enabled;
+        selectedShape = null;
+        repaint();
+    }
+
+    public boolean isSelectionMode() {
+        return selectionMode;
+    }
+
     @Override protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         Graphics2D g2 = (Graphics2D) g.create();
@@ -121,7 +176,7 @@ class DrawingPanel extends JPanel {
     }
 
     public void DrawPreviewShape(Graphics2D g2) {
-        if (startDrag != null && endDrag != null) {
+        if (startDrag != null && endDrag != null ) {
             int x = Math.min(startDrag.x, endDrag.x);
             int y = Math.min(startDrag.y, endDrag.y);
             int w = Math.abs(startDrag.x - endDrag.x);
@@ -150,4 +205,14 @@ class DrawingPanel extends JPanel {
         }
     }
 
+
+    private AbstractShape findShapeAt(Point p) {
+        for (int i = shapes.size() - 1; i >= 0; i--) {
+            AbstractShape s = shapes.get(i);
+            if (s.createShape().contains(p)) {
+                return s;
+            }
+        }
+        return null;
+    }
 }
