@@ -3,6 +3,9 @@ package br.com.mariojp.figureeditor;
 
 import javax.swing.*;
 
+import br.com.mariojp.figureeditor.command.CommandManager;
+import br.com.mariojp.figureeditor.command.commands.AddShapeCommand;
+import br.com.mariojp.figureeditor.command.commands.ClearAllShapesCommand;
 import br.com.mariojp.figureeditor.shapes.ShapeFactory.ShapeFactory;
 import br.com.mariojp.figureeditor.shapes.enums.ShapeType;
 import br.com.mariojp.figureeditor.shapes.models.AbstractShape;
@@ -24,6 +27,8 @@ class DrawingPanel extends JPanel {
 
     private ShapeType currentShapeType = ShapeType.RECTANGLE;
     private Color selectedColor = Color.BLUE;
+
+    private CommandManager commandManager = new CommandManager();
 
     DrawingPanel() {
         
@@ -54,7 +59,8 @@ class DrawingPanel extends JPanel {
                     if (w < 10) w = DEFAULT_SIZE;
                     if (h < 10) h = DEFAULT_SIZE;
                     AbstractShape s =  ShapeFactory.createShape(getCurrentShapeType(), x, y, w, h, getSelectedColor());
-                    shapes.add(s);
+                    
+                    commandManager.executeCommand(new AddShapeCommand(shapes, s));
                     startDrag = null;
                     endDrag = null;
                     repaint();
@@ -65,6 +71,15 @@ class DrawingPanel extends JPanel {
         addMouseListener(mouse);        
         addMouseMotionListener(mouse);
 
+    }
+
+    void clear() {
+        commandManager.executeCommand(new ClearAllShapesCommand(shapes));
+        repaint();
+    }
+
+    public CommandManager getCommandManager(){
+        return commandManager;
     }
 
     public void setCurrentShapeType(ShapeType shapeType) {
@@ -82,11 +97,6 @@ class DrawingPanel extends JPanel {
     public Color getSelectedColor() {
         return this.selectedColor;
     }   
-
-    void clear() {
-        shapes.clear();
-        repaint();
-    }
 
     @Override protected void paintComponent(Graphics g) {
         super.paintComponent(g);

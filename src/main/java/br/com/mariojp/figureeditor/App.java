@@ -29,6 +29,11 @@ public class App {
             tlbMenuBar.addSeparator();
             JButton btnClear = new JButton("Limpar");
             tlbMenuBar.add(btnClear);
+            tlbMenuBar.addSeparator();
+            JButton btnRedo = new JButton("Refazer");
+            tlbMenuBar.add(btnRedo);
+            JButton btnUndo = new JButton("Desfazer");
+            tlbMenuBar.add(btnUndo);
 
             // Adicione a barra no topo
             frame.add(tlbMenuBar, BorderLayout.NORTH);
@@ -49,6 +54,16 @@ public class App {
             });
 
             btnClear.addActionListener(e -> pnlDrawing.clear());
+
+            btnRedo.addActionListener(e -> {
+                pnlDrawing.getCommandManager().redo();
+                pnlDrawing.repaint();
+            });
+
+            btnUndo.addActionListener(e -> {
+                pnlDrawing.getCommandManager().undo();
+                pnlDrawing.repaint();
+            });
 
             frame.setSize(800, 600);
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

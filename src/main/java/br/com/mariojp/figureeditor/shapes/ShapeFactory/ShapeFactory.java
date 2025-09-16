@@ -1,7 +1,6 @@
 package br.com.mariojp.figureeditor.shapes.ShapeFactory;
 
 import java.awt.Color;
-import java.awt.Rectangle;
 import java.util.EnumMap;
 import java.util.Map;
 
